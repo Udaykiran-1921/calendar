@@ -14,12 +14,23 @@
       flex-direction: column;
       align-items: center;
     }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #222;
+      font-size: 2rem;
+    }
+
+    /* Calendar Layout */
     .year-calendar {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
       max-width: 1200px;
+      width: 100%;
     }
+
     .month {
       background: white;
       border-radius: 10px;
@@ -58,11 +69,6 @@
       color: white;
       border-radius: 4px;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #222;
-    }
 
     /* Memories Section */
     .memories {
@@ -78,6 +84,7 @@
       margin-top: 0;
       text-align: center;
       color: #333;
+      font-size: 1.5rem;
     }
     .memories form {
       display: flex;
@@ -146,6 +153,27 @@
       color: #888;
       font-style: italic;
       margin-top: 10px;
+    }
+
+    /* 📱 Responsive */
+    @media (max-width: 1024px) {
+      .year-calendar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .year-calendar {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .month h3 {
+        font-size: 16px;
+      }
+      .memories {
+        padding: 15px;
+      }
     }
   </style>
 </head>
@@ -288,7 +316,6 @@
     document.addEventListener("click", function(e) {
       if (e.target.matches(".days div[data-date]")) {
         const dateClicked = e.target.getAttribute("data-date");
-        const memories = JSON.parse(localStorage.getItem("memories")) || [];
         const memoryItem = document.querySelector(`.memory-item[data-date="${dateClicked}"]`);
 
         memoriesSection.scrollIntoView({ behavior: "smooth" });
