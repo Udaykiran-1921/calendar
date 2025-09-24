@@ -70,6 +70,32 @@
       border-radius: 4px;
     }
 
+    /* Mobile month navigation */
+    .mobile-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .mobile-nav button {
+      background: #007bff;
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .mobile-nav button:hover {
+      background: #0056b3;
+    }
+    .mobile-nav span {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
     /* Memories Section */
     .memories {
       margin-top: 40px;
@@ -160,11 +186,8 @@
       .year-calendar {
         grid-template-columns: 1fr;
       }
-      h1 {
-        font-size: 1.5rem;
-      }
-      .month h3 {
-        font-size: 16px;
+      .mobile-nav {
+        display: flex;
       }
     }
   </style>
@@ -172,6 +195,12 @@
 <body>
   <div>
     <h1 id="yearTitle"></h1>
+    <!-- Mobile nav for months -->
+    <div class="mobile-nav" id="mobileNav">
+      <button id="prevMonth">⬅️</button>
+      <span id="mobileMonthLabel"></span>
+      <button id="nextMonth">➡️</button>
+    </div>
     <div class="year-calendar" id="yearCalendar"></div>
   </div>
 
@@ -197,7 +226,7 @@
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const today = currentDate.getDate();
-    const thisMonth = currentDate.getMonth();
+    let currentMonth = currentDate.getMonth();
 
     yearTitle.textContent = currentYear;
 
@@ -223,7 +252,7 @@
 
       for (let d = 1; d <= lastDate; d++) {
         let dayClass = "";
-        if (d === today && month === thisMonth && year === currentYear) {
+        if (d === today && month === currentMonth && year === currentYear) {
           dayClass = "today";
         }
         const dateString = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
@@ -238,15 +267,28 @@
       yearCalendar.innerHTML = "";
 
       if (window.innerWidth <= 600) {
-        // Mobile → show only current month
-        yearCalendar.innerHTML = renderMonth(thisMonth, currentYear);
+        // Mobile → show current month only
+        yearCalendar.innerHTML = renderMonth(currentMonth, currentYear);
+        document.getElementById("mobileMonthLabel").textContent = monthNames[currentMonth];
+        document.getElementById("mobileNav").style.display = "flex";
       } else {
-        // Desktop → show all months
+        // Desktop → show all 12 months
         for (let m = 0; m < 12; m++) {
           yearCalendar.innerHTML += renderMonth(m, currentYear);
         }
+        document.getElementById("mobileNav").style.display = "none";
       }
     }
+
+    // Navigation buttons
+    document.getElementById("prevMonth").addEventListener("click", () => {
+      currentMonth = (currentMonth - 1 + 12) % 12;
+      renderCalendar();
+    });
+    document.getElementById("nextMonth").addEventListener("click", () => {
+      currentMonth = (currentMonth + 1) % 12;
+      renderCalendar();
+    });
 
     // Render once on load
     renderCalendar();
