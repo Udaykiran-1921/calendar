@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Year Calendar with Memories</title>
+  <title>Responsive Calendar with Memories</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -55,7 +55,7 @@
       color: #555;
     }
     .days div {
-      padding: 5px;
+      padding: 8px;
       margin: 1px;
       border-radius: 4px;
       cursor: pointer;
@@ -156,11 +156,6 @@
     }
 
     /* 📱 Responsive */
-    @media (max-width: 1024px) {
-      .year-calendar {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
     @media (max-width: 600px) {
       .year-calendar {
         grid-template-columns: 1fr;
@@ -170,9 +165,6 @@
       }
       .month h3 {
         font-size: 16px;
-      }
-      .memories {
-        padding: 15px;
       }
     }
   </style>
@@ -242,10 +234,26 @@
       return html;
     }
 
-    for (let m = 0; m < 12; m++) {
-      yearCalendar.innerHTML += renderMonth(m, currentYear);
+    function renderCalendar() {
+      yearCalendar.innerHTML = "";
+
+      if (window.innerWidth <= 600) {
+        // Mobile → show only current month
+        yearCalendar.innerHTML = renderMonth(thisMonth, currentYear);
+      } else {
+        // Desktop → show all months
+        for (let m = 0; m < 12; m++) {
+          yearCalendar.innerHTML += renderMonth(m, currentYear);
+        }
+      }
     }
 
+    // Render once on load
+    renderCalendar();
+    // Re-render if screen is resized
+    window.addEventListener("resize", renderCalendar);
+
+    // --- Memories Section ---
     const memoryForm = document.getElementById("memoryForm");
     const memoryList = document.getElementById("memoryList");
 
