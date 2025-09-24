@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Year Calendar with Memories</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .year-calendar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 20px;
+      max-width: 1200px;
+    }
+    .month {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 10px;
+    }
+    .month h3 {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 18px;
+      color: #333;
+    }
+    .weekdays, .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 12px;
+    }
+    .weekdays div {
+      font-weight: bold;
+      padding: 5px 0;
+      color: #555;
+    }
+    .days div {
+      padding: 5px;
+      margin: 1px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .days div:hover {
+      background: #007bff;
+      color: white;
+    }
+    .today {
+      background: #007bff;
+      color: white;
+      border-radius: 4px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #222;
+    }
+
+    /* Memories Section */
+    .memories {
+      margin-top: 40px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+    }
+    .memories h2 {
+      margin-top: 0;
+      text-align: center;
+      color: #333;
+    }
+    .memories form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .memories input, .memories textarea, .memories button {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .memories button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .memories button:hover {
+      background: #0056b3;
+    }
+    .memory-list {
+      margin-top: 20px;
+    }
+    .memory-item {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid #007bff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: background 0.5s, box-shadow 0.5s;
+    }
+    .memory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .memory-text {
+      font-size: 14px;
+    }
+    .memory-img {
+      max-width: 100%;
+      border-radius: 6px;
+    }
+    .delete-btn {
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .delete-btn:hover {
+      background: darkred;
+    }
+    .highlight {
+      background: #fff8b3 !important;
+      box-shadow: 0 0 10px 2px gold;
+    }
+    .no-memory {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1 id="yearTitle"></h1>
+    <div class="year-calendar" id="yearCalendar"></div>
+  </div>
+
+  <!-- Memories Section -->
+  <div class="memories" id="memoriesSection">
+    <h2>Save Your Memories</h2>
+    <form id="memoryForm">
+      <input type="date" id="memoryDate" required>
+      <textarea id="memoryText" rows="3" placeholder="Write your memory..." required></textarea>
+      <input type="file" id="memoryImage" accept="image/*">
+      <button type="submit">Save Memory</button>
+    </form>
+    <div class="memory-list" id="memoryList"></div>
+    <div id="noMemoryMessage" class="no-memory"></div>
+  </div>
+
+  <script>
+    const yearCalendar = document.getElementById("yearCalendar");
+    const yearTitle = document.getElementById("yearTitle");
+    const memoriesSection = document.getElementById("memoriesSection");
+    const noMemoryMessage = document.getElementById("noMemoryMessage");
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const today = currentDate.getDate();
+    const thisMonth = currentDate.getMonth();
+
+    yearTitle.textContent = currentYear;
+
+    const monthNames = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+
+    function renderMonth(month, year) {
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      let html = `<div class="month"><h3>${monthNames[month]}</h3>`;
+      html += `<div class="weekdays">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+        <div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>`;
+      html += `<div class="days">`;
+
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div></div>`;
+      }
+
+      for (let d = 1; d <= lastDate; d++) {
+        let dayClass = "";
+        if (d === today && month === thisMonth && year === currentYear) {
+          dayClass = "today";
+        }
+        const dateString = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        html += `<div class="${dayClass}" data-date="${dateString}">${d}</div>`;
+      }
+
+      html += `</div></div>`;
+      return html;
+    }
+
+    for (let m = 0; m < 12; m++) {
+      yearCalendar.innerHTML += renderMonth(m, currentYear);
+    }
+
+    const memoryForm = document.getElementById("memoryForm");
+    const memoryList = document.getElementById("memoryList");
+
+    function loadMemories() {
+      const memories = JSON.parse(localStorage.getItem("memories")) || [];
+      memoryList.innerHTML = "";
+      noMemoryMessage.textContent = "";
+
+      memories.forEach((mem, index) => {
+        const div = document.createElement("div");
+        div.classList.add("memory-item");
+        div.setAttribute("data-date", mem.date);
+
+        div.innerHTML = `
+          <div class="memory-header">
+            <strong>${mem.date}</strong>
+            <button class="delete-btn" data-index="${index}">Delete</button>
+          </div>
+          <div class="memory-text">${mem.text}</div>
+          ${mem.image ? `<img src="${mem.image}" class="memory-img">` : ""}
+        `;
+
+        memoryList.appendChild(div);
+      });
+
+      document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const index = this.getAttribute("data-index");
+          deleteMemory(index);
+        });
+      });
+    }
+
+    function deleteMemory(index) {
+      let memories = JSON.parse(localStorage.getItem("memories")) || [];
+      memories.splice(index, 1);
+      localStorage.setItem("memories", JSON.stringify(memories));
+      loadMemories();
+    }
+
+    memoryForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const date = document.getElementById("memoryDate").value;
+      const text = document.getElementById("memoryText").value;
+      const imageFile = document.getElementById("memoryImage").files[0];
+
+      if (date && text) {
+        if (imageFile) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            saveMemory(date, text, event.target.result);
+          };
+          reader.readAsDataURL(imageFile);
+        } else {
+          saveMemory(date, text, null);
+        }
+      }
+    });
+
+    function saveMemory(date, text, image) {
+      const memories = JSON.parse(localStorage.getItem("memories")) || [];
+      memories.push({ date, text, image });
+      localStorage.setItem("memories", JSON.stringify(memories));
+      document.getElementById("memoryForm").reset();
+      loadMemories();
+    }
+
+    document.addEventListener("click", function(e) {
+      if (e.target.matches(".days div[data-date]")) {
+        const dateClicked = e.target.getAttribute("data-date");
+        const memories = JSON.parse(localStorage.getItem("memories")) || [];
+        const memoryItem = document.querySelector(`.memory-item[data-date="${dateClicked}"]`);
+
+        memoriesSection.scrollIntoView({ behavior: "smooth" });
+
+        document.querySelectorAll(".memory-item").forEach(el => el.classList.remove("highlight"));
+        if (memoryItem) {
+          memoryItem.classList.add("highlight");
+          setTimeout(() => memoryItem.classList.remove("highlight"), 3000);
+          noMemoryMessage.textContent = "";
+        } else {
+          noMemoryMessage.textContent = `No memory saved for ${dateClicked}`;
+        }
+      }
+    });
+
+    loadMemories();
+  </script>
+</body>
+</html>
